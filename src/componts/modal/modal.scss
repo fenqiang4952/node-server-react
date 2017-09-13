@@ -9,10 +9,46 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
   .modal {
+    width: 300px;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     margin: 50% 0 0 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%,-100%);
     background: #ffffff;
     border-radius: 5px;
     box-shadow: 0 0 5px #000000;
+    padding: 20px;
+    .header {
+      border-bottom: 1px solid #cccccc;
+      margin: 0 -20px;
+      padding: 0 0 20px 10px;
+      h3 {
+        margin: 0;
+      }
+    }
+    .body {
+      padding: 20px 0;
+      flex: 1;
+    }
+    .body>div{
+      height: 40px;
+      line-height: 40px;
+      span {
+        min-width: 80px;
+        display: inline-block;
+        text-align: right;
+      }
+    }
+    .footer {
+      border-top: 1px solid #cccccc;
+      margin: 0 -20px;
+      padding: 10px 20px 0;
+      text-align: right;
+      input[type="button"]:not(:nth-last-of-type(1)){
+        margin-right: 10px;
+      }
+    }
   }
 }
