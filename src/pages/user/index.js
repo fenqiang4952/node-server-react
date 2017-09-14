@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import _ from 'lodash'
 import axios from 'axios'
 import './index.scss'
-import UserItem from '../../componts/userItem'
-import UserModal from '../../componts/userModal'
+// import UserItem from '../../componts/userItem'
+// import UserModal from '../../componts/userModal'
+import {Table, Modal, Form,Input,Radio, Button } from 'antd';
+const FormItem = Form.Item;
 
-export default class User extends Component {
+class User extends Component {
   constructor(props) {
     super(props);
     this.delItem = this.delItem.bind(this)
@@ -19,11 +21,24 @@ export default class User extends Component {
       userList: [],
       modalTitle: '添加用户',
       addUserModal: false,
-      modalEnable: false,
-      activeUserSex: '',
-      activeUserName: '',
-      activeUser: null
+      activeUser: null,
+      visible: false
     }
+    this.columns = [
+      { title: 'Name', dataIndex: 'name', key: 'name' },
+      { title: 'Sex', dataIndex: 'sex', key: 'sex',render: (text, record) => {
+        return text ===1?'男':'女'
+     }  },
+      { title: 'Action', key: 'operation', render: (text, record) => {
+         return (
+           <div>
+          <Button onClick={()=>{this.delItem(record.id)}} type="danger">删除</Button>
+          <Button onClick={()=>{this.updateItem(record.id)}} type="primary">修改</Button>
+         </div>
+        )
+      } 
+    }
+    ]
   }
   componentDidMount = async () => {
     this.getUserAll()
@@ -42,46 +57,42 @@ export default class User extends Component {
   }
   addUser() {
     this.setState({
-      modalEnable: true,
       modalTitle: '添加用户',
       addUserModal: true,
-      activeUserSex: '',
-      activeUserName: '',
-      activeUser: null
+      visible: true
     });
   }
   cancel() {
     this.setState({
       modalEnable: false,
+      visible: false
     });
   }
-  async sure() {
-    let url = '/app/addUser'
-    let data_ = null
-    if(this.state.addUserModal) {
-      url = '/app/addUser'
-      data_ = {
-        name: this.state.activeUserName,
-        sex: this.state.activeUserSex
+  sure() {
+    const form = this.props.form;
+    form.validateFields( async (err, values) => {
+      if (err) {
+        return;
       }
-    }else {
-      url = '/app/updateUser'
-      data_ = {
-        name: this.state.activeUserName,
-        sex: this.state.activeUserSex,
-        id: this.state.activeUser.id
+      let url = '/app/addUser'
+      if(this.state.addUserModal) {
+        url = '/app/addUser'
+      }else {
+        url = '/app/updateUser'
+        values.id = this.state.activeUser.id
       }
-    }
-    const { data } = await axios.request({
-      url,
-      method: 'Post',
-      data:data_,
-    })
-    this.setState({
-      modalEnable: false
-    })
-    this.getUserAll()
-    console.log(data);
+      await axios.request({
+        url,
+        method: 'Post',
+        data:values,
+      })
+      this.setState({
+        modalEnable: false
+      })
+      this.getUserAll()
+      form.resetFields();
+      this.setState({ visible: false });
+    });
   }
 
   async delItem(_id) {
@@ -96,7 +107,6 @@ export default class User extends Component {
         id: _id
       }
     })
-    console.log(data);
   }
   updateItem(_id) {
     const user = _.find(this.state.userList,{id: _id})
@@ -105,25 +115,55 @@ export default class User extends Component {
       addUserModal: false,
       modalTitle: '修改用户',
       activeUser: user,
-      activeUserSex: user.sex,
-      activeUserName: user.name,
+      visible: true
     });
+    this.props.form.setFieldsValue({...user,sex:''+user.sex});
   }
 
   render () {
-    const userList = this.state.userList.map((item) => {
-      return <UserItem updateItem={this.updateItem} delItem={this.delItem} id={item.id} name={item.name} sex={item.sex}></UserItem>
-    }) 
+    // const userList = this.state.userList.map((item) => {
+    //   return <UserItem updateItem={this.updateItem} delItem={this.delItem} id={item.id} name={item.name} sex={item.sex}></UserItem>
+    // })
+    
+    const { getFieldDecorator } = this.props.form;
     return (
       <div className="user">
-        <ul className="userList">
-          {userList}
-        </ul>
+        <Table bordered columns={this.columns} dataSource={this.state.userList} />
         <div>
-          <input type="button" onClick={this.addUser} value="添加" />
+          <Button type="primary" onClick={this.addUser}>添加</Button>
         </div>
-        <UserModal handleChange={this.handleChange} userSex={this.state.activeUserSex} userName={this.state.activeUserName} enable={this.state.modalEnable} title={this.state.modalTitle} sure={this.sure} cancel={this.cancel}></UserModal>
+        <Modal
+          title={this.state.modalTitle}
+          visible={this.state.visible}
+          onOk={this.sure}
+          onCancel={this.cancel}
+        >
+        <Form layout="vertical">
+          <FormItem label="name">
+            {getFieldDecorator('name', {
+              rules: [{ required: true, message: '请输入名字!' }],
+            })(
+              <Input />
+            )}
+          </FormItem>
+          <FormItem className="collection-create-form_last-form-item">
+            {getFieldDecorator('sex', {
+              initialValue: '1',
+            })(
+              <Radio.Group>
+                <Radio value="1">男</Radio>
+                <Radio value="2">女</Radio>
+              </Radio.Group>
+            )}
+          </FormItem>
+        </Form>
+        </Modal>
       </div> 
     );
   }
 }
+
+const WrappedUser = Form.create()(User);
+
+export default WrappedUser
+

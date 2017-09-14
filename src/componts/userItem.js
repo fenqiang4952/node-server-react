@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button } from 'antd'
 
 export default class userItem extends Component {
   // constructor(props) {
@@ -12,8 +13,8 @@ export default class userItem extends Component {
         <span>{this.props.name}</span>
         <span>{this.props.sex}</span>
         <div className="btnBox" >
-          <input onClick={()=>{this.props.delItem(this.props.id)}} type="button" value="删除" />
-          <input onClick={()=>{this.props.updateItem(this.props.id)}} type="button" value="修改" />
+          <Button onClick={()=>{this.props.delItem(this.props.id)}} type="danger">删除</Button>
+          <Button onClick={()=>{this.props.updateItem(this.props.id)}} type="primary">修改</Button>
         </div>
       </li>
     );
