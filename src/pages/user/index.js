@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import _ from 'lodash'
 import axios from 'axios'
 import './index.scss'
-// import UserItem from '../../componts/userItem'
-// import UserModal from '../../componts/userModal'
 import {Table, Modal, Form,Input,Radio, Button } from 'antd';
 const FormItem = Form.Item;
 
